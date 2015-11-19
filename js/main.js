@@ -1,13 +1,10 @@
 /*
    Copyright 2014 Nebez Briefkani
    floppybird - main.js
-
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
        http://www.apache.org/licenses/LICENSE-2.0
-
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -466,7 +463,7 @@ function updatePipes()
    //add a new pipe (top height + bottom height  + pipeheight == 420) and put it in our tracker
    var padding = 80;
    var constraint = 420 - pipeheight - (padding * 2); //double padding (for top and bottom)
-   var topheight = Math.floor((Math.random()*constraint) + padding); //add lower padding
+   var topheight = Math.floor(constraint + padding); //add lower padding (Math.random()*constraint) +
    var bottomheight = (420 - pipeheight) - topheight;
    var newpipe = $('<div class="pipe animated"><div class="pipe_upper" style="height: ' + topheight + 'px;"></div><div class="pipe_lower" style="height: ' + bottomheight + 'px;"></div></div>');
    $("#flyarea").append(newpipe);
