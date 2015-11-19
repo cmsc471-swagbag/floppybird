@@ -6,8 +6,11 @@ What I did instead is something way more primitive. This project uses nothing bu
 
 Live App
 ------------
-Check out a live preview of it over here:  
+Check out a live preview of The original over here:  
 http://nebez.github.io/floppybird/
+
+Current test version
+http://userpages.umbc.edu/~dayyan1/471/
 
 Cool Stuff
 ---------
