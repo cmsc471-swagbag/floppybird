@@ -37,6 +37,12 @@ var pipes = new Array();
 
 var replayclickable = false;
 
+//OUR custom var's
+var pipesInit = .9;
+var pipesCounter = 0;
+
+
+
 //sounds
 var volume = 30;
 var soundJump = new buzz.sound("assets/sounds/sfx_wing.ogg");
@@ -131,6 +137,10 @@ function startGame()
       //show the bounding boxes
       $(".boundingbox").show();
    }
+
+   //clear out the pipe info
+   pipesInit = .1;
+   pipesCounter = 0;
 
    //start up our loops
    var updaterate = 1000.0 / 60.0 ; //60 times a second
@@ -455,6 +465,9 @@ function playerScore()
    setBigScore();
 }
 
+
+// This is the method where the pipes are updated
+
 function updatePipes()
 {
    //Do any pipes need removal?
@@ -463,11 +476,55 @@ function updatePipes()
    //add a new pipe (top height + bottom height  + pipeheight == 420) and put it in our tracker
    var padding = 80;
    var constraint = 420 - pipeheight - (padding * 2); //double padding (for top and bottom)
-   var topheight = Math.floor(constraint + padding); //add lower padding (Math.random()*constraint) +
+   var topheight = Math.floor(pipesInit * constraint + padding); //add lower padding (Math.random()*constraint) +
    var bottomheight = (420 - pipeheight) - topheight;
    var newpipe = $('<div class="pipe animated"><div class="pipe_upper" style="height: ' + topheight + 'px;"></div><div class="pipe_lower" style="height: ' + bottomheight + 'px;"></div></div>');
    $("#flyarea").append(newpipe);
    pipes.push(newpipe);
+
+   if(pipesCounter%10 ==0)
+   {
+      pipesInit = .1;
+   }
+   else if(pipesCounter%10 ==1)
+   {
+      pipesInit = .2;
+   }
+   else if(pipesCounter%10 ==2)
+   {
+      pipesInit = .5;      
+   }
+   else if(pipesCounter%10 ==3)
+   {
+      pipesInit = .6;      
+   }
+   else if(pipesCounter%10 ==4)
+   {
+      pipesInit = .7;      
+   }
+   else if(pipesCounter%10 ==5)
+   {
+      pipesInit = .9;      
+   }
+   else if(pipesCounter%10 ==6)
+   {
+      pipesInit = .8;      
+   }
+   else if(pipesCounter%10 ==7)
+   {
+      pipesInit = .5;      
+   }
+   else if(pipesCounter%10 ==8)
+   {
+      pipesInit = .4;      
+   }
+   else if(pipesCounter%10 ==9)
+   {
+      pipesInit = .3;     
+   }
+
+   pipesCounter++;
+
 }
 
 var isIncompatible = {
