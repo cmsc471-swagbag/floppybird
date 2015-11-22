@@ -22,6 +22,7 @@ var states = Object.freeze({
 
 var currentstate;
 
+var dead = false;
 var gravity = 0.25;
 var velocity = 0;
 var position = 180;
@@ -30,7 +31,7 @@ var jump = -4.6;
 
 var score = 0;
 var highscore = 0;
-
+var box;
 var pipeheight = 90;
 var pipewidth = 52;
 var pipes = new Array();
@@ -161,7 +162,7 @@ function gameloop() {
    updatePlayer(player);
    
    //create the bounding box
-   var box = document.getElementById('player').getBoundingClientRect();
+   box = document.getElementById('player').getBoundingClientRect();
    var origwidth = 34.0;
    var origheight = 24.0;
    
@@ -343,6 +344,7 @@ function setMedal()
 
 function playerDead()
 {
+   dead = true;
    //stop animating everything!
    $(".animated").css('animation-play-state', 'paused');
    $(".animated").css('-webkit-animation-play-state', 'paused');
@@ -432,6 +434,8 @@ $("#replay").click(function() {
       return;
    else
       replayclickable = false;
+
+   dead = false;
    //SWOOSH!
    soundSwoosh.stop();
    soundSwoosh.play();
