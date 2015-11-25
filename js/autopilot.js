@@ -1,8 +1,8 @@
 var pipe_gap = 90,
 	flap_thresh = 0;
 
-var vertical_dist_range = [-350, 190];
-var horizontal_dist_range = [0, 180];
+var vertical_dist_range = [0, 200];
+var horizontal_dist_range = [0, 44];
 
 var m_state = {"vertical_distance": 0, "horizontal_distance": 0};
 var m_state_dash = {"vertical_distance": 0, "horizontal_distance": 0};
@@ -13,6 +13,7 @@ var resolution = 1;
 var min_diff = 9999;
 var max_diff = -9999;
 var reward = 0;
+
 
 
 function init()
@@ -27,6 +28,7 @@ function init()
 			}
 		}
 	console.log(Q);
+	console.log(reward);
 }
 
 //unused
@@ -60,18 +62,18 @@ function flap() {
 //Where the bot decides what to do, and where it learns.
 //For now only flaps, will hold majority of code
 function tick(state, piperight, pipebottom, boxright, boxbottom) {
-		console.log("tick");
+		var reward = 0;
 	   if(state == "dead")
    		{
 			setTimeout(replay, 3000);
 			reward = -1000;
-			console.log("u r dead");
    		}
 		else
 		{
 			reward = 1;
+			
 		}
-
+		
 		//Step 1: determine distances
 		var horizontal_distance = 9999;
 		var vertical_distance = 9999;
@@ -84,6 +86,11 @@ function tick(state, piperight, pipebottom, boxright, boxbottom) {
 		m_state_dash.vertical_distance = vertical_distance;
 		m_state_dash.horizontal_distance = horizontal_distance;
 		
+		console.log("boxleft: \t" + boxright);
+		console.log("piperight: \t" + piperight);
+		console.log("Vertical: \t" + vertical_distance);
+		console.log("Horizontal:\t" + horizontal_distance);
+		console.log("--");
 
 		//Step 3: Update Q(S, A)
 
@@ -95,7 +102,7 @@ function tick(state, piperight, pipebottom, boxright, boxbottom) {
 			), 
 			0
 		);
-		
+
 		var state_bin_h = 
 		Math.max( 
 			Math.min ( 
@@ -124,6 +131,10 @@ function tick(state, piperight, pipebottom, boxright, boxbottom) {
 			0
 		);
 
+		console.log("S: V - " + state_bin_v + ", H - " + state_bin_h);
+		console.log("S' V - " + state_dash_bin_v + ", H - " + state_dash_bin_h);
+		console.log("---");
+
 		var click_v = Q[state_dash_bin_v][state_dash_bin_h]["click"];
 		var do_nothing_v = Q[state_dash_bin_v][state_dash_bin_h]["do_nothing"]
 		var V_s_dash_a_dash = Math.max(click_v, do_nothing_v);
@@ -133,7 +144,7 @@ function tick(state, piperight, pipebottom, boxright, boxbottom) {
 		Q_s_a + alpha_QL * (reward + V_s_dash_a_dash - Q_s_a);		
 
 		// Step 4: S <- S'
-		m_state = m_state_dash;
+		m_state = clone(m_state_dash);
 
 		// Step 5: Select and perform Action A
 		var state_bin_v = 
@@ -163,6 +174,15 @@ function tick(state, piperight, pipebottom, boxright, boxbottom) {
 		if (action_to_perform == "click") {
 			flap()
 		}
+}
+
+function clone(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
 }
 
 init();
