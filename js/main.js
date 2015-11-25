@@ -12,7 +12,7 @@
    limitations under the License.
 */
 
-var debugmode = false;
+var debugmode = true;
 
 var states = Object.freeze({
    SplashScreen: 0,
@@ -22,12 +22,16 @@ var states = Object.freeze({
 
 var currentstate;
 
-var dead = false;
+var state = "dead";
 var gravity = 0.25;
 var velocity = 0;
 var position = 180;
 var rotation = 0;
 var jump = -4.6;
+var boxright;
+var boxtop;
+var piperight;
+var pipebottom;
 
 var score = 0;
 var highscore = 0;
@@ -123,6 +127,7 @@ function showSplash()
 
 function startGame()
 {
+   console.log("started");
    currentstate = states.GameScreen;
    
    //fade out the splash
@@ -150,6 +155,7 @@ function startGame()
    
    //jump from the start!
    playerJump();
+
 }
 
 function updatePlayer(player)
@@ -162,6 +168,7 @@ function updatePlayer(player)
 }
 
 function gameloop() {
+   state = "alive"
    var player = $("#player");
    
    //update the player speed/position
@@ -196,6 +203,8 @@ function gameloop() {
    //did we hit the ground?
    if(box.bottom >= $("#land").offset().top)
    {
+      state = "dead";
+      tick(state, piperight, pipebottom, boxright, boxbottom)
       playerDead();
       return;
    }
@@ -207,16 +216,18 @@ function gameloop() {
    
    //we can't go any further without a pipe
    if(pipes[0] == null)
+   {
+      flap();
       return;
-   
+   }
    //determine the bounding box of the next pipes inner area
    var nextpipe = pipes[0];
    var nextpipeupper = nextpipe.children(".pipe_upper");
    
    var pipetop = nextpipeupper.offset().top + nextpipeupper.height();
    var pipeleft = nextpipeupper.offset().left - 2; // for some reason it starts at the inner pipes offset, not the outer pipes.
-   var piperight = pipeleft + pipewidth;
-   var pipebottom = pipetop + pipeheight;
+   piperight = pipeleft + pipewidth;
+   pipebottom = pipetop + pipeheight;
    
    if(debugmode)
    {
@@ -226,6 +237,8 @@ function gameloop() {
       boundingbox.css('height', pipeheight);
       boundingbox.css('width', pipewidth);
    }
+
+   tick(state, piperight, pipebottom, boxright, boxbottom);
    
    //have we gotten inside the pipe yet?
    if(boxright > pipeleft)
@@ -239,6 +252,8 @@ function gameloop() {
       else
       {
          //no! we touched the pipe
+         state = "dead";
+         tick(state, piperight, pipebottom, boxright, boxbottom)
          playerDead();
          return;
       }
@@ -354,7 +369,8 @@ function setMedal()
 
 function playerDead()
 {
-   dead = true;
+
+
    //stop animating everything!
    $(".animated").css('animation-play-state', 'paused');
    $(".animated").css('-webkit-animation-play-state', 'paused');
