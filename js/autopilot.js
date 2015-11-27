@@ -1,19 +1,20 @@
 var pipe_gap = 90,
 	flap_thresh = 0;
 
-var vertical_dist_range = [0, 200];
-var horizontal_dist_range = [0, 44];
+var vertical_dist_range = [0, 300];
+var horizontal_dist_range = [0, 100];
 
 var m_state = {"vertical_distance": 0, "horizontal_distance": 0};
 var m_state_dash = {"vertical_distance": 0, "horizontal_distance": 0};
 var Q;
 var action_to_perform = "do_nothing";
 var alpha_QL = 0.7;
-var resolution = 1;
+var resolution = 4;
 var min_diff = 9999;
 var max_diff = -9999;
 var reward = 0;
-
+var writeArray = true;
+var readArray = true;
 
 
 function init()
@@ -21,37 +22,18 @@ function init()
 	Q = new Array();
 	for (var vert_dist = 0; vert_dist < (vertical_dist_range[1] - vertical_dist_range[0])/resolution; vert_dist++) {
 		Q[vert_dist] = new Array();
-
 		// Horizontal Distance
 		for (var hori_dist = 0; hori_dist < (horizontal_dist_range[1] - horizontal_dist_range[0])/resolution; hori_dist++) {
 			Q[vert_dist][hori_dist] = {"click": 0, "do_nothing": 0};
 			}
 		}
-	console.log(Q);
-	console.log(reward);
-}
-
-//unused
-function getDistance() {
-	var p = pipes[0];
-	if (p === undefined) {
-		return ($('#ceiling').offset().top + $('#land').offset().top) / 2;
+		console.log(Q);	
 	}
-	p = p.children('.pipe_upper');
-	var result = ((p.offset().top + p.height())) + pipe_gap / 2;
-	result += pipe_gap / 8;
-	return result;
-}
-
-//unused
-function currentHeight() {
-	return $('#player').offset().top + $('#player').height() / 2;
-}
 
 //Clicks on the replay button and begins calling decide again
 function replay(){
 	$("#replay").click();
-	setTimeout(flap, 1000)
+	setTimeout(flap, 2000)
 }
 
 function flap() {
@@ -63,10 +45,11 @@ function flap() {
 //For now only flaps, will hold majority of code
 function tick(state, piperight, pipebottom, boxright, boxbottom) {
 		var reward = 0;
+	
 	   if(state == "dead")
    		{
-			setTimeout(replay, 3000);
-			reward = -1000;
+			setTimeout(replay, 1500);
+			reward = -3000;
    		}
 		else
 		{
@@ -86,8 +69,9 @@ function tick(state, piperight, pipebottom, boxright, boxbottom) {
 		m_state_dash.vertical_distance = vertical_distance;
 		m_state_dash.horizontal_distance = horizontal_distance;
 		
-		console.log("boxleft: \t" + boxright);
-		console.log("piperight: \t" + piperight);
+		//console.log("boxleft: \t" + boxright);
+		//console.log("piperight: \t" + piperight);
+		console.log("--");
 		console.log("Vertical: \t" + vertical_distance);
 		console.log("Horizontal:\t" + horizontal_distance);
 		console.log("--");
@@ -97,8 +81,8 @@ function tick(state, piperight, pipebottom, boxright, boxbottom) {
 		var state_bin_v = 
 		Math.max( 
 			Math.min ( 
-				Math.floor((vertical_dist_range[1]-vertical_dist_range[0]-1)), 
-				Math.floor( (m_state.vertical_distance - vertical_dist_range[0]))
+				Math.floor((vertical_dist_range[1]-vertical_dist_range[0]-1)/resolution), 
+				Math.floor( (m_state.vertical_distance - vertical_dist_range[0])/resolution)
 			), 
 			0
 		);
@@ -140,8 +124,10 @@ function tick(state, piperight, pipebottom, boxright, boxbottom) {
 		var V_s_dash_a_dash = Math.max(click_v, do_nothing_v);
 
 		var Q_s_a =  Q[state_bin_v][state_bin_h][action_to_perform];
-		Q[state_bin_v][state_bin_h][action_to_perform] = 
-		Q_s_a + alpha_QL * (reward + V_s_dash_a_dash - Q_s_a);		
+		var pointsToAssign = Q_s_a + alpha_QL * (reward + V_s_dash_a_dash - Q_s_a);		
+		console.log(pointsToAssign);
+		Q[state_bin_v][state_bin_h][action_to_perform] = pointsToAssign;
+		
 
 		// Step 4: S <- S'
 		m_state = clone(m_state_dash);
