@@ -12,7 +12,7 @@
    limitations under the License.
 */
 
-var debugmode = true;
+var debugmode = false;
 
 var states = Object.freeze({
    SplashScreen: 0,
@@ -149,7 +149,7 @@ function startGame()
    pipesCounter = 0;
 
    //start up our loops
-   var updaterate = 1000.0 / 60.0 ; //60 times a second
+   var updaterate = 1000.0 / 96.0 ; //60 times a second
    loopGameloop = setInterval(gameloop, updaterate);
    loopPipeloop = setInterval(updatePipes, 1400);
    
