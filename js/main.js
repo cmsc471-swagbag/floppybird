@@ -22,7 +22,7 @@ var states = Object.freeze({
 
 var currentstate;
 
-var state = "dead";
+var deadOrAlive = "dead";
 var gravity = 0.25;
 var velocity = 0;
 var position = 180;
@@ -168,7 +168,7 @@ function updatePlayer(player)
 }
 
 function gameloop() {
-   state = "alive"
+   deadOrAlive = "alive"
    var player = $("#player");
    
    //update the player speed/position
@@ -203,8 +203,8 @@ function gameloop() {
    //did we hit the ground?
    if(box.bottom >= $("#land").offset().top)
    {
-      state = "dead";
-      tick(state, piperight, pipebottom, boxright, boxbottom)
+      deadOrAlive = "dead";
+      tick(deadOrAlive, piperight, pipebottom, boxright, boxbottom)
       playerDead();
       return;
    }
@@ -238,7 +238,7 @@ function gameloop() {
       boundingbox.css('width', pipewidth);
    }
 
-   tick(state, piperight, pipebottom, boxright, boxbottom);
+   tick(deadOrAlive, piperight, pipebottom, boxright, boxbottom);
    
    //have we gotten inside the pipe yet?
    if(boxright > pipeleft)
@@ -252,8 +252,8 @@ function gameloop() {
       else
       {
          //no! we touched the pipe
-         state = "dead";
-         tick(state, piperight, pipebottom, boxright, boxbottom)
+         deadOrAlive = "dead";
+         tick(deadOrAlive, piperight, pipebottom, boxright, boxbottom)
          playerDead();
          return;
       }
