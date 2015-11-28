@@ -1,52 +1,46 @@
-var pipe_gap = 90,
-	flap_thresh = 0;
 
-var vertical_dist_range = [0, 300];
-var horizontal_dist_range = [0, 100];
+var verticalMax = 300, 
+horiziontalMax = 100,
+prev_state = {"verticalDistance": 0, "horizontalDistance": 0},	//previous state, 1 tick behind
+curr_state = {"verticalDistance": 0, "horizontalDistance": 0},	//state we're in now
+Q,	//Q Array holding learned knowledge
+actionToPerform = "do_nothing",	//What should the bird do?
+alpha_QL = 0.7,	//Learning Rate
+scale = 4,	//Used to scale down pixel values for faster learning
+reward = 0;	//reward for action
 
-var m_state = {"vertical_distance": 0, "horizontal_distance": 0};
-var m_state_dash = {"vertical_distance": 0, "horizontal_distance": 0};
-var Q;
-var action_to_perform = "do_nothing";
-var alpha_QL = 0.7;
-var resolution = 4;
-var min_diff = 9999;
-var max_diff = -9999;
-var reward = 0;
-var writeArray = true;
-var readArray = true;
-
-
+//Initalizes Q 2-D Array at runtime
 function init()
 {
 	Q = new Array();
-	for (var vert_dist = 0; vert_dist < (vertical_dist_range[1] - vertical_dist_range[0])/resolution; vert_dist++) {
+	for (var vert_dist = 0; vert_dist < verticalMax/scale; vert_dist++) {
 		Q[vert_dist] = new Array();
 		// Horizontal Distance
-		for (var hori_dist = 0; hori_dist < (horizontal_dist_range[1] - horizontal_dist_range[0])/resolution; hori_dist++) {
+		for (var hori_dist = 0; hori_dist < horiziontalMax/scale; hori_dist++) {
 			Q[vert_dist][hori_dist] = {"click": 0, "do_nothing": 0};
 			}
-		}
-		console.log(Q);	
 	}
+	console.log(Q);	
+}
 
-//Clicks on the replay button and begins calling decide again
+//Clicks on the replay button and performs the initial flap needed
 function replay(){
 	$("#replay").click();
 	setTimeout(flap, 2000)
 }
 
+//Performs a jump
 function flap() {
 	$(document).mousedown();
 	$(document).trigger('touchstart');
 }
 
 //Where the bot decides what to do, and where it learns.
-//For now only flaps, will hold majority of code
-function tick(state, piperight, pipebottom, boxright, boxbottom) {
+//Called by Main.js during every cycle of game loop
+function tick(deadOrAlive, piperight, pipebottom, boxright, boxbottom) {
 		var reward = 0;
 	
-	   if(state == "dead")
+	   if(deadOrAlive == "dead")
    		{
 			setTimeout(replay, 1500);
 			reward = -3000;
@@ -58,110 +52,97 @@ function tick(state, piperight, pipebottom, boxright, boxbottom) {
 		}
 		
 		//Step 1: determine distances
-		var horizontal_distance = 9999;
-		var vertical_distance = 9999;
 
 		if (piperight)
-			horizontal_distance = piperight - boxright;
+			var horizontalDistance = piperight - boxright;
 		if (pipebottom)
-			vertical_distance = pipebottom - boxbottom;
+			var verticalDistance = pipebottom - boxbottom;
 
-		m_state_dash.vertical_distance = vertical_distance;
-		m_state_dash.horizontal_distance = horizontal_distance;
-		
-		//console.log("boxleft: \t" + boxright);
-		//console.log("piperight: \t" + piperight);
-		console.log("--");
-		console.log("Vertical: \t" + vertical_distance);
-		console.log("Horizontal:\t" + horizontal_distance);
-		console.log("--");
-
-		//Step 3: Update Q(S, A)
-
-		var state_bin_v = 
-		Math.max( 
-			Math.min ( 
-				Math.floor((vertical_dist_range[1]-vertical_dist_range[0]-1)/resolution), 
-				Math.floor( (m_state.vertical_distance - vertical_dist_range[0])/resolution)
-			), 
-			0
-		);
-
-		var state_bin_h = 
-		Math.max( 
-			Math.min ( 
-				Math.floor((horizontal_dist_range[1]-horizontal_dist_range[0]-1)/resolution), 
-				Math.floor((m_state.horizontal_distance - horizontal_dist_range[0])/resolution )
-			), 
-			0
-		);
-
-
-		var state_dash_bin_v = 
-		Math.max( 
-			Math.min ( 
-				Math.floor((vertical_dist_range[1]-vertical_dist_range[0]-1)/resolution), 
-				Math.floor((m_state_dash.vertical_distance - vertical_dist_range[0])/resolution )
-			), 
-			0
-		);
-		
-		var state_dash_bin_h = 
-		Math.max( 
-			Math.min ( 
-				Math.floor((horizontal_dist_range[1]-horizontal_dist_range[0]-1)/resolution), 
-				Math.floor((m_state_dash.horizontal_distance - horizontal_dist_range[0])/resolution )
-			), 
-			0
-		);
-
-		console.log("S: V - " + state_bin_v + ", H - " + state_bin_h);
-		console.log("S' V - " + state_dash_bin_v + ", H - " + state_dash_bin_h);
-		console.log("---");
-
-		var click_v = Q[state_dash_bin_v][state_dash_bin_h]["click"];
-		var do_nothing_v = Q[state_dash_bin_v][state_dash_bin_h]["do_nothing"]
-		var V_s_dash_a_dash = Math.max(click_v, do_nothing_v);
-
-		var Q_s_a =  Q[state_bin_v][state_bin_h][action_to_perform];
-		var pointsToAssign = Q_s_a + alpha_QL * (reward + V_s_dash_a_dash - Q_s_a);		
-		console.log(pointsToAssign);
-		Q[state_bin_v][state_bin_h][action_to_perform] = pointsToAssign;
+		curr_state.verticalDistance = verticalDistance;
+		curr_state.horizontalDistance = horizontalDistance;
 		
 
-		// Step 4: S <- S'
-		m_state = clone(m_state_dash);
+		//console.log("BirdX: \t" + boxright);
+		//console.log("PipeX: \t" + piperight);
+		//console.log("BirdY: \t" + boxbottom);
+		//console.log("PipeY: \t" + pipebottom);
+		//console.log("--");
 
-		// Step 5: Select and perform Action A
-		var state_bin_v = 
+		//console.log("Vertical: \t" + verticalDistance);
+		//console.log("Horizontal:\t" + horizontalDistance);
+		//console.log("--");
+
+		//Step 2: Update Q(S, A)
+
+		var prev_state_v = 
 		Math.max( 
 			Math.min ( 
-				Math.floor((vertical_dist_range[1]-vertical_dist_range[0]-1)/resolution), 
-				Math.floor((m_state.vertical_distance - vertical_dist_range[0])/resolution )
+				Math.floor((verticalMax-1)/scale), 
+				Math.floor(prev_state.verticalDistance/scale)
 			), 
 			0
 		);
-			
-		var state_bin_h = 
+
+		var prev_state_h = 
 		Math.max( 
 			Math.min ( 
-				Math.floor((horizontal_dist_range[1]- horizontal_dist_range[0]-1)/resolution), 
-				Math.floor( (m_state.horizontal_distance - horizontal_dist_range[0])/resolution )
+				Math.floor((horiziontalMax-1)/scale), 
+				Math.floor(prev_state.horizontalDistance/scale)
 			), 
 			0
 		);
 
-		var click_v = Q[state_bin_v][state_bin_h]["click"];
-		var do_nothing_v = Q[state_bin_v][state_bin_h]["do_nothing"]
-		action_to_perform = click_v > do_nothing_v ? "click" : "do_nothing";
 
-		//console.log("action performed: " + action_to_perform);
+		var curr_state_v = 
+		Math.max( 
+			Math.min ( 
+				Math.floor((verticalMax-1)/scale), 
+				Math.floor(curr_state.verticalDistance/scale)
+			), 
+			0
+		);
+		
+		var curr_state_h = 
+		Math.max( 
+			Math.min ( 
+				Math.floor((horiziontalMax-1)/scale), 
+				Math.floor(curr_state.horizontalDistance/scale)
+			), 
+			0
+		);
 
-		if (action_to_perform == "click") {
+		//console.log("S: V - " + prev_state_v + ", H - " + prev_state_h);
+		//console.log("S' V - " + curr_state_v + ", H - " + curr_state_h);
+		//console.log("---");
+
+		var clickValue = Q[curr_state_v][curr_state_h]["click"],
+		doNothingValue = Q[curr_state_v][curr_state_h]["do_nothing"],
+		greaterValue = Math.max(clickValue, doNothingValue),
+
+
+		//determine points to assign for the action we took during last tick
+		Qsa =  Q[prev_state_v][prev_state_h][actionToPerform],
+		pointsToAssign = Qsa + alpha_QL * (reward + greaterValue - Qsa);		
+
+		//console.log("Assinging points: " + pointsToAssign);
+		Q[prev_state_v][prev_state_h][actionToPerform] = pointsToAssign;
+	
+	
+		//Step 3: Determine action to take
+		actionToPerform = clickValue > doNothingValue ? "click" : "do_nothing";
+
+		//console.log("action performed: " + actionToPerform);
+
+		if (actionToPerform == "click") {
 			flap()
 		}
+
+		// Step 4: Set Previous state equal to current state in preparation for call end
+		prev_state = clone(curr_state);
 }
 
+
+//Clones an object and it's proerties
 function clone(obj) {
     if (null == obj || "object" != typeof obj) return obj;
     var copy = obj.constructor();
