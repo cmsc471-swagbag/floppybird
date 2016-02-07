@@ -36,10 +36,35 @@
       <!-- Style sheets -->
       <link href="css/reset.css" rel="stylesheet">
       <link href="css/main.css" rel="stylesheet">
+      <script type="text/javascript">
+      window.onload = function () { 
+         var dps = [];   //dataPoints.    
+         var chart = new CanvasJS.Chart("chartContainer",{
+            title :{ text: "Live Data"},
+            axisX :{ title: "Axis X Title"},
+            axisY :{ title: "Units"},
+            data: [{ type: "line", dataPoints : dps}]
+         });
+         chart.render();
+         var xVal = dps.length + 1;
+         var yVal = 15; 
+         var updateInterval = 1000;
+         var updateChart = function () {
+            yVal = yVal
+            dps.push({x: xVal,y: currentscore});
+            xVal++;
+            chart.render();      
+            // update chart after specified time. 
+         };
+         setInterval(function(){updateChart()}, updateInterval); 
+      }
+      </script>
+      <script type="text/javascript" src="/assets/script/canvasjs.min.js"></script>
    </head>
    <body>
       <div id="gamecontainer">
          <div id="gamescreen">
+            <div id="chartContainer" style="position: absolute; right: 5px; z-index: 100; height: 300px; width: 50%;"></div>
             <div id="sky" class="animated">
                <div id="flyarea">
                   <div id="ceiling" class="animated"></div>
