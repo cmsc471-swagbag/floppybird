@@ -4,9 +4,7 @@ A flappy bird AI that teaches itself how to avoid dying by using reinforcement l
 
 Live App
 ------------
-The App can be accessed here:
-
-http://userpages.umbc.edu/~ferrier1/floppy/welcome.html
+**[Link to Live App](http://userpages.umbc.edu/~ferrier1/floppy/welcome.html)**
 
 Be sure to read the description before starting.
 
