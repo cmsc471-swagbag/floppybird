@@ -6,7 +6,7 @@ curr_state = {"verticalDistance": 0, "horizontalDistance": 0},	//state we're in 
 Q,	//Q Array holding learned knowledge
 actionToPerform = "do_nothing",	//What should the bird do?
 alpha_QL = 0.7,	//Learning Rate
-scale = 4,	//Used to scale down pixel values for faster learning
+scale = 10,	//Used to scale down pixel values for faster learning
 reward = 0;	//reward for action
 
 //Initalizes Q 2-D Array at runtime
@@ -20,7 +20,16 @@ function init()
 			Q[vert_dist][hori_dist] = {"click": 0, "do_nothing": 0};
 			}
 	}
-	console.log(Q);	
+		console.log(Q);	
+		 var previousScore = -1;
+         var updateInterval = 1000;
+         var updateChart = function () {
+         	if (previousScore != score)
+         	{
+            }    
+            // update chart after specified time. 
+         };
+         setInterval(function(){updateChart()}, updateInterval); 
 }
 
 //Clicks on the replay button and performs the initial flap needed
@@ -141,7 +150,6 @@ function tick(deadOrAlive, piperight, pipebottom, boxright, boxbottom) {
 		prev_state = clone(curr_state);
 }
 
-
 //Clones an object and it's proerties
 function clone(obj) {
     if (null == obj || "object" != typeof obj) return obj;
@@ -153,5 +161,6 @@ function clone(obj) {
 }
 
 init();
+
 
 

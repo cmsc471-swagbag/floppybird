@@ -37,29 +37,17 @@
       <link href="css/reset.css" rel="stylesheet">
       <link href="css/main.css" rel="stylesheet">
       <script type="text/javascript">
+      var chart;
       window.onload = function () { 
-         var dps = [];   //dataPoints.    
-         var chart = new CanvasJS.Chart("chartContainer",{
+         chart = new CanvasJS.Chart("chartContainer",{
             title :{ text: "Live Data"},
-            axisX :{ title: "Axis X Title"},
-            axisY :{ title: "Units"},
-            data: [{ type: "line", dataPoints : dps}]
+            axisX :{ title: "Run Number", interval:1, minimum: 0, viewportMinimum: 0, viewportMaximum: 30},
+            axisY :{ title: "Score", interval:1, minimum: 0},
+            data: [{ type: "line", dataPoints : []}]
          });
          chart.render();
-         var xVal = dps.length + 1;
-         var yVal = 15; 
-         var updateInterval = 1000;
-         var updateChart = function () {
-            yVal = yVal
-            dps.push({x: xVal,y: currentscore});
-            xVal++;
-            chart.render();      
-            // update chart after specified time. 
-         };
-         setInterval(function(){updateChart()}, updateInterval); 
       }
       </script>
-      <script type="text/javascript" src="/assets/script/canvasjs.min.js"></script>
    </head>
    <body>
       <div id="gamecontainer">
@@ -102,5 +90,7 @@
       <script src="js/buzz.min.js"></script>
       <script src="js/main.js"></script>
       <script src="js/autopilot.js"></script>
+      <script src="js/canvasjs.min.js"></script>
    </body>
+
 </html>

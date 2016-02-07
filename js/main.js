@@ -369,8 +369,9 @@ function setMedal()
 
 function playerDead()
 {
-
-
+   previousScore = score;
+   chart.options.data[0].dataPoints.push({y: score});
+   chart.render();  
    //stop animating everything!
    $(".animated").css('animation-play-state', 'paused');
    $(".animated").css('-webkit-animation-play-state', 'paused');
